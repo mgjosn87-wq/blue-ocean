@@ -11,6 +11,8 @@
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
     body { font-family: 'Inter', system-ui, sans-serif; }
     .ocean-gradient { background: linear-gradient(135deg, #0ea5e9 0%, #1e40af 100%); }
+    .card-input { transition: all 0.2s; }
+    .card-input:focus { border-color: #0ea5e9; box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2); }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-900">
@@ -68,31 +70,44 @@
     </div>
   </div>
 
-  <!-- 结账页 -->
+  <!-- 结账页（信用卡/储蓄卡支付界面） -->
   <div id="checkoutModal" class="hidden fixed inset-0 bg-black/70 z-[1000] flex items-center justify-center">
     <div class="bg-white rounded-3xl max-w-md w-full mx-4">
       <div class="p-8">
-        <h3 id="checkoutTitle" class="text-2xl font-semibold mb-6">Checkout - NOWPayments</h3>
+        <h3 id="checkoutTitle" class="text-2xl font-semibold mb-6">Checkout - Credit / Debit Card</h3>
+        
         <div class="space-y-8">
           <div>
             <label class="block text-sm mb-2" id="emailLabel">Email (for order confirmation)</label>
             <input id="customerEmail" type="email" placeholder="your@email.com" class="w-full border border-slate-300 rounded-2xl px-5 py-4 focus:outline-none focus:border-blue-500">
           </div>
 
-          <div class="bg-emerald-50 border border-emerald-200 rounded-3xl p-6 text-center">
-            <p class="text-sm text-emerald-700 mb-2">支付方式：NOWPayments 加密货币支付</p>
-            <p id="checkoutTotalDisplay" class="text-3xl font-bold mb-6">$0.00</p>
-            
-            <!-- NOWPayments Donation Button（已使用你提供的公钥） -->
-            <a href="https://nowpayments.io/donation?api_key=9cf26d58-55cf-4e41-902f-9b601dde0bc1" 
-               target="_blank" rel="noreferrer noopener" onclick="processPayment()">
-              <img src="https://nowpayments.io/images/embeds/donation-button-black.svg" 
-                   alt="Crypto donation button by NOWPayments" class="mx-auto">
-            </a>
-            <p class="text-xs text-slate-500 mt-4">请在新页面支付与总金额一致的金额（支持 USDT 等）</p>
+          <!-- 信用卡/储蓄卡输入表单 -->
+          <div>
+            <label class="block text-sm mb-3" id="cardLabel">Credit / Debit Card Information (2D Payment)</label>
+            <div class="bg-slate-50 border border-slate-200 rounded-3xl p-6 space-y-4">
+              <div class="flex gap-3 mb-3">
+                <i class="fab fa-cc-visa text-4xl text-blue-600"></i>
+                <i class="fab fa-cc-mastercard text-4xl text-red-500"></i>
+                <i class="fab fa-cc-amex text-4xl text-blue-500"></i>
+              </div>
+              <input id="cardNumber" type="text" maxlength="19" placeholder="4242 4242 4242 4242" 
+                     class="card-input w-full bg-white border border-slate-300 rounded-2xl px-5 py-4 text-xl font-mono focus:outline-none" oninput="formatCardNumber(this)">
+              <div class="grid grid-cols-2 gap-4">
+                <input id="cardExpiry" type="text" maxlength="5" placeholder="MM/YY" 
+                       class="card-input bg-white border border-slate-300 rounded-2xl px-5 py-4 focus:outline-none" oninput="formatExpiry(this)">
+                <input id="cardCVV" type="text" maxlength="4" placeholder="CVV" 
+                       class="card-input bg-white border border-slate-300 rounded-2xl px-5 py-4 focus:outline-none">
+              </div>
+            </div>
           </div>
 
-          <button onclick="hideCheckout()" class="w-full bg-slate-200 text-slate-700 py-4 rounded-2xl text-lg font-medium">返回购物车</button>
+          <button onclick="processPayment()" class="w-full bg-emerald-600 text-white py-5 rounded-3xl text-xl font-semibold hover:bg-emerald-700 flex items-center justify-center gap-2">
+            <i class="fas fa-lock"></i>
+            <span id="payBtnText">Pay Securely Now</span>
+          </button>
+
+          <p onclick="hideCheckout()" class="text-center text-slate-400 cursor-pointer hover:text-slate-600">Back to Cart</p>
         </div>
       </div>
     </div>
@@ -103,7 +118,7 @@
     <div class="bg-white rounded-3xl max-w-md w-full mx-4 text-center p-8">
       <i class="fas fa-check-circle text-7xl text-emerald-500 mb-6"></i>
       <h2 id="successTitle" class="text-3xl font-bold mb-2">Payment Successful!</h2>
-      <p id="successDesc" class="text-slate-600 mb-8">订单已生成，请在 NOWPayments 后台查看交易</p>
+      <p id="successDesc" class="text-slate-600 mb-8">Your order has been placed successfully.</p>
       <div class="bg-slate-100 rounded-2xl p-6 mb-8 text-left">
         <p class="text-sm"><span class="font-medium">Order ID:</span> <span id="orderIdDisplay" class="font-mono"></span></p>
         <p class="text-sm"><span class="font-medium">Email:</span> <span id="emailDisplay"></span></p>
@@ -148,7 +163,7 @@
   <!-- Footer -->
   <footer class="bg-slate-900 text-white py-12">
     <div class="max-w-7xl mx-auto px-6 text-center">
-      <p class="text-sm text-slate-400">Blue Ocean © 2026 • Powered by NOWPayments • USD Pricing • 1688 Dropship</p>
+      <p class="text-sm text-slate-400">Blue Ocean © 2026 • USD Pricing • Secure Card Payment • 1688 Dropship</p>
     </div>
   </footer>
 
@@ -165,8 +180,8 @@
     let adminPassword = 'admin123';
 
     const translations = {
-      zh: { heroTitle: "探索蓝色海洋", heroDesc: "全球优质好物 · 1688一件代发 · 美元结算", productsTitle: "精选商品", cartTitle: "购物车", totalLabel: "总计", emailLabel: "邮箱地址（订单确认）", checkoutTitle: "结账 - NOWPayments", successTitle: "支付成功！", successDesc: "订单已生成，请在 NOWPayments 后台查看交易" },
-      en: { heroTitle: "Discover the Blue Ocean", heroDesc: "Premium Global Goods · 1688 Dropship · USD Pricing", productsTitle: "Featured Products", cartTitle: "Cart", totalLabel: "Total", emailLabel: "Email (Order Confirmation)", checkoutTitle: "Checkout - NOWPayments", successTitle: "Payment Successful!", successDesc: "Order placed. Check NOWPayments dashboard" }
+      zh: { heroTitle: "探索蓝色海洋", heroDesc: "全球优质好物 · 1688一件代发 · 美元结算", productsTitle: "精选商品", cartTitle: "购物车", totalLabel: "总计", emailLabel: "邮箱地址（订单确认）", cardLabel: "信用卡/储蓄卡信息（2D支付）", checkoutTitle: "结账 - 信用卡支付", successTitle: "支付成功！", successDesc: "订单已生成" },
+      en: { heroTitle: "Discover the Blue Ocean", heroDesc: "Premium Global Goods · 1688 Dropship · USD Pricing", productsTitle: "Featured Products", cartTitle: "Cart", totalLabel: "Total", emailLabel: "Email (Order Confirmation)", cardLabel: "Credit / Debit Card Information (2D Payment)", checkoutTitle: "Checkout - Card Payment", successTitle: "Payment Successful!", successDesc: "Order placed successfully" }
     };
 
     // ==================== 渲染 & 购物车 ====================
@@ -246,13 +261,22 @@
 
     function checkout() {
       hideCart();
-      const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
-      document.getElementById('checkoutTotalDisplay').textContent = `$${total.toFixed(2)}`;
       document.getElementById('checkoutModal').classList.remove('hidden');
     }
     function hideCheckout() { document.getElementById('checkoutModal').classList.add('hidden'); }
 
-    // ==================== NOWPayments 支付处理 ====================
+    // 卡号格式化
+    function formatCardNumber(input) {
+      let val = input.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+      let matches = val.match(/\d{1,4}/g);
+      if (matches) input.value = matches.join(' ');
+    }
+    function formatExpiry(input) {
+      let val = input.value.replace(/[^0-9]/gi, '');
+      if (val.length >= 2) input.value = val.slice(0,2) + '/' + val.slice(2);
+    }
+
+    // ==================== 支付处理（信用卡/储蓄卡） ====================
     function processPayment() {
       const email = document.getElementById('customerEmail').value.trim();
       if (!email) return alert(currentLang === 'zh' ? '请填写邮箱' : 'Please enter email');
@@ -266,7 +290,7 @@
         items: [...cart],
         total: total,
         time: new Date().toLocaleString(),
-        payment: 'NOWPayments (Crypto)'
+        payment: 'Credit / Debit Card (2D)'
       };
       orders.unshift(order);
       localStorage.setItem('blueOceanOrders', JSON.stringify(orders));
@@ -367,7 +391,7 @@
     function init() {
       renderProducts();
       updateCartCount();
-      console.log('%c✅ Blue Ocean NOWPayments 已执行完成！', 'color:#0ea5e9;font-size:16px;font-weight:bold');
+      console.log('%c✅ Blue Ocean 已全部改为信用卡/储蓄卡支付', 'color:#0ea5e9;font-size:16px;font-weight:bold');
     }
     window.onload = init;
   </script>
