@@ -70,19 +70,20 @@
     </div>
   </div>
 
-  <!-- 结账页 - 信用卡/储蓄卡支付 -->
+  <!-- 结账页（双通道） -->
   <div id="checkoutModal" class="hidden fixed inset-0 bg-black/70 z-[1000] flex items-center justify-center">
     <div class="bg-white rounded-3xl max-w-md w-full mx-4">
       <div class="p-8">
-        <h3 id="checkoutTitle" class="text-2xl font-semibold mb-6">Checkout - Credit / Debit Card</h3>
+        <h3 id="checkoutTitle" class="text-2xl font-semibold mb-6">Checkout</h3>
         <div class="space-y-8">
           <div>
             <label class="block text-sm mb-2" id="emailLabel">Email (for order confirmation)</label>
             <input id="customerEmail" type="email" placeholder="your@email.com" class="w-full border border-slate-300 rounded-2xl px-5 py-4 focus:outline-none focus:border-blue-500">
           </div>
 
-          <div>
-            <label class="block text-sm mb-3" id="cardLabel">Credit / Debit Card Information (2D Payment)</label>
+          <!-- NexaPay.one 信用卡通道 -->
+          <div class="border border-slate-200 rounded-3xl p-6">
+            <p class="font-medium mb-4">信用卡 / 储蓄卡支付（NexaPay.one）</p>
             <div class="bg-slate-50 border border-slate-200 rounded-3xl p-6 space-y-4">
               <div class="flex gap-3 mb-3">
                 <i class="fab fa-cc-visa text-4xl text-blue-600"></i>
@@ -95,14 +96,18 @@
                 <input id="cardCVV" type="text" maxlength="4" placeholder="CVV" class="card-input bg-white border border-slate-300 rounded-2xl px-5 py-4 focus:outline-none">
               </div>
             </div>
+            <button onclick="processCardPayment()" class="mt-6 w-full bg-emerald-600 text-white py-4 rounded-2xl text-lg font-semibold hover:bg-emerald-700">使用信用卡支付</button>
           </div>
 
-          <button onclick="processPayment()" class="w-full bg-emerald-600 text-white py-5 rounded-3xl text-xl font-semibold hover:bg-emerald-700 flex items-center justify-center gap-2">
-            <i class="fas fa-lock"></i>
-            <span id="payBtnText">Pay Securely Now</span>
-          </button>
+          <!-- 原NOWPayments通道 -->
+          <div class="text-center">
+            <p class="text-sm text-slate-500 mb-3">或使用加密货币支付（原通道）</p>
+            <a href="https://nowpayments.io/donation?api_key=9cf26d58-55cf-4e41-902f-9b601dde0bc1" target="_blank" rel="noreferrer noopener" onclick="processCryptoPayment()">
+              <img src="https://nowpayments.io/images/embeds/donation-button-black.svg" alt="NOWPayments" class="mx-auto">
+            </a>
+          </div>
 
-          <p onclick="hideCheckout()" class="text-center text-slate-400 cursor-pointer hover:text-slate-600">Back to Cart</p>
+          <p onclick="hideCheckout()" class="text-center text-slate-400 cursor-pointer hover:text-slate-600">返回购物车</p>
         </div>
       </div>
     </div>
@@ -113,7 +118,7 @@
     <div class="bg-white rounded-3xl max-w-md w-full mx-4 text-center p-8">
       <i class="fas fa-check-circle text-7xl text-emerald-500 mb-6"></i>
       <h2 id="successTitle" class="text-3xl font-bold mb-2">Payment Successful!</h2>
-      <p id="successDesc" class="text-slate-600 mb-8">Your order has been placed successfully.</p>
+      <p id="successDesc" class="text-slate-600 mb-8">订单已生成</p>
       <div class="bg-slate-100 rounded-2xl p-6 mb-8 text-left">
         <p class="text-sm"><span class="font-medium">Order ID:</span> <span id="orderIdDisplay" class="font-mono"></span></p>
         <p class="text-sm"><span class="font-medium">Email:</span> <span id="emailDisplay"></span></p>
@@ -158,7 +163,7 @@
   <!-- Footer -->
   <footer class="bg-slate-900 text-white py-12">
     <div class="max-w-7xl mx-auto px-6 text-center">
-      <p class="text-sm text-slate-400">Blue Ocean © 2026 • Secure Credit/Debit Card Payment • 1688 Dropship</p>
+      <p class="text-sm text-slate-400">Blue Ocean © 2026 • NexaPay.one + NOWPayments • 1688 Dropship</p>
     </div>
   </footer>
 
@@ -174,8 +179,8 @@
     let adminPassword = 'admin123';
 
     const translations = {
-      zh: { heroTitle: "探索蓝色海洋", heroDesc: "全球优质好物 · 1688一件代发 · 美元结算", productsTitle: "精选商品", cartTitle: "购物车", totalLabel: "总计", emailLabel: "邮箱地址（订单确认）", cardLabel: "信用卡/储蓄卡信息（2D支付）", checkoutTitle: "结账 - 信用卡支付", successTitle: "支付成功！", successDesc: "订单已生成" },
-      en: { heroTitle: "Discover the Blue Ocean", heroDesc: "Premium Global Goods · 1688 Dropship · USD Pricing", productsTitle: "Featured Products", cartTitle: "Cart", totalLabel: "Total", emailLabel: "Email (Order Confirmation)", cardLabel: "Credit / Debit Card Information (2D Payment)", checkoutTitle: "Checkout - Card Payment", successTitle: "Payment Successful!", successDesc: "Order placed successfully" }
+      zh: { heroTitle: "探索蓝色海洋", heroDesc: "全球优质好物 · 1688一件代发 · 美元结算", productsTitle: "精选商品", cartTitle: "购物车", totalLabel: "总计", emailLabel: "邮箱地址（订单确认）", cardLabel: "信用卡/储蓄卡信息（NexaPay.one）", checkoutTitle: "结账", successTitle: "支付成功！", successDesc: "订单已生成" },
+      en: { heroTitle: "Discover the Blue Ocean", heroDesc: "Premium Global Goods · 1688 Dropship · USD Pricing", productsTitle: "Featured Products", cartTitle: "Cart", totalLabel: "Total", emailLabel: "Email (Order Confirmation)", cardLabel: "Credit / Debit Card (NexaPay.one)", checkoutTitle: "Checkout", successTitle: "Payment Successful!", successDesc: "Order placed successfully" }
     };
 
     function renderProducts() {
@@ -268,21 +273,41 @@
       if (val.length >= 2) input.value = val.slice(0,2) + '/' + val.slice(2);
     }
 
-    function processPayment() {
+    // NexaPay.one 信用卡支付
+    function processCardPayment() {
+      const email = document.getElementById('customerEmail').value.trim();
+      const cardNumber = document.getElementById('cardNumber').value.trim();
+      const cardExpiry = document.getElementById('cardExpiry').value.trim();
+      const cardCVV = document.getElementById('cardCVV').value.trim();
+
+      if (!email) return alert(currentLang === 'zh' ? '请填写邮箱' : 'Please enter email');
+      if (!cardNumber || cardNumber.length < 15) return alert(currentLang === 'zh' ? '请填写完整的信用卡号' : 'Please enter valid card number');
+      if (!cardExpiry || cardExpiry.length < 5) return alert(currentLang === 'zh' ? '请填写有效期' : 'Please enter expiry date');
+      if (!cardCVV || cardCVV.length < 3) return alert(currentLang === 'zh' ? '请填写CVV' : 'Please enter CVV');
+
+      const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+      const orderId = 'BO-' + Date.now().toString().slice(-8);
+
+      const order = { id: orderId, email, items: [...cart], total, time: new Date().toLocaleString(), payment: 'NexaPay.one (Card)' };
+      orders.unshift(order);
+      localStorage.setItem('blueOceanOrders', JSON.stringify(orders));
+
+      hideCheckout();
+      showSuccess(orderId, email, total);
+
+      // 已集成你提供的NexaPay.one支付链接
+      window.open('https://nexapay.one/checkout/order_d977539960c7f689e83c3b3e4ca61ae5?sig=plsig_e33426a70d0cfca0f48e83b5e2a810d8ff440cb0ee1c5224174626889f271541', '_blank');
+    }
+
+    // 原NOWPayments通道
+    function processCryptoPayment() {
       const email = document.getElementById('customerEmail').value.trim();
       if (!email) return alert(currentLang === 'zh' ? '请填写邮箱' : 'Please enter email');
 
       const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
       const orderId = 'BO-' + Date.now().toString().slice(-8);
 
-      const order = {
-        id: orderId,
-        email: email,
-        items: [...cart],
-        total: total,
-        time: new Date().toLocaleString(),
-        payment: 'Credit / Debit Card (2D)'
-      };
+      const order = { id: orderId, email, items: [...cart], total, time: new Date().toLocaleString(), payment: 'NOWPayments (Crypto)' };
       orders.unshift(order);
       localStorage.setItem('blueOceanOrders', JSON.stringify(orders));
 
@@ -381,7 +406,7 @@
     function init() {
       renderProducts();
       updateCartCount();
-      console.log('%c✅ Blue Ocean 信用卡支付版本已加载完成', 'color:#0ea5e9;font-size:16px;font-weight:bold');
+      console.log('%c✅ Blue Ocean 双通道已集成完成（NexaPay.one + NOWPayments）', 'color:#0ea5e9;font-size:16px;font-weight:bold');
     }
     window.onload = init;
   </script>
