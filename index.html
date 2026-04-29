@@ -70,7 +70,7 @@
     </div>
   </div>
 
-  <!-- 结账页（双通道） -->
+  <!-- 结账页（NexaPay.one + NOWPayments 双通道） -->
   <div id="checkoutModal" class="hidden fixed inset-0 bg-black/70 z-[1000] flex items-center justify-center">
     <div class="bg-white rounded-3xl max-w-md w-full mx-4">
       <div class="p-8">
@@ -273,7 +273,7 @@
       if (val.length >= 2) input.value = val.slice(0,2) + '/' + val.slice(2);
     }
 
-    // NexaPay.one 信用卡支付
+    // NexaPay.one 信用卡支付（必须填卡信息）
     function processCardPayment() {
       const email = document.getElementById('customerEmail').value.trim();
       const cardNumber = document.getElementById('cardNumber').value.trim();
@@ -295,7 +295,7 @@
       hideCheckout();
       showSuccess(orderId, email, total);
 
-      // 已集成你提供的NexaPay.one支付链接
+      // 你的 NexaPay.one 支付链接
       window.open('https://nexapay.one/checkout/order_d977539960c7f689e83c3b3e4ca61ae5?sig=plsig_e33426a70d0cfca0f48e83b5e2a810d8ff440cb0ee1c5224174626889f271541', '_blank');
     }
 
@@ -406,7 +406,7 @@
     function init() {
       renderProducts();
       updateCartCount();
-      console.log('%c✅ Blue Ocean 双通道已集成完成（NexaPay.one + NOWPayments）', 'color:#0ea5e9;font-size:16px;font-weight:bold');
+      console.log('%c✅ Blue Ocean 双通道完整版已加载（NexaPay.one + NOWPayments）', 'color:#0ea5e9;font-size:16px;font-weight:bold');
     }
     window.onload = init;
   </script>
